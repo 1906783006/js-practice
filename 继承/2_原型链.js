@@ -1,27 +1,24 @@
-// 1.定义Animal的构造函数
+// Animal 构造函数
 function Animal() {
     this.colors = ["red", "green"]
 }
-
-// 2.给Animal添加方法
 Animal.prototype.animalFunction = function () {
     console.log(this.colors);
 }
 
-// 3.定义Person的构造函数
+// Person的构造函数
 function Person() {
     this.personProperty = "Person"
 }
 
-// 4.给Person赋值新的原型对象
+// 1.给Person赋值新的原型对象
 Person.prototype = new Animal()
 
-// 5.给Person添加方法
+// 2.给Person添加方法
 Person.prototype.personFunction = function () {
     alert(this.personProperty)
 }
 
-// 6.创建Person对象, 并且调用方法
 var person1 = new Person()
 var person2 = new Person()
 
