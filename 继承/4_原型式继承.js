@@ -10,7 +10,9 @@ function object(o) {
 }
 
 const person1 = object(person);
-// person1.colors.push('yellow');
+person1.colors.push('yellow');
 
-// console.log(person.colors, person1.colors);
-person1.getName();
+console.log(person.colors, person1.colors);
+// person1.getName();
+
+// 缺点：存在继承属性引用类型问题
