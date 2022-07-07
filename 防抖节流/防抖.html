@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="input">
+    <button id="cancle">取消发送</button>
+</body>
+</html>
+
+<script>
+    function getInputVal() {
+        console.log(arguments[0].target.value);
+    }
+
+    /** 1. 防抖函数 */
+    function debounce(fn, delay) {
+        var timer = null;
+
+        return function() {
+            if(timer) clearTimeout(timer);
+
+            var _this = this;
+            var _arguments = arguments;
+
+            timer = setTimeout(function() {
+                fn.apply(_this, _arguments);
+            }, delay);
+        }
+    }
+
+    /** 2. 添加取消处理的防抖函数 */
+    function debounce1(fn, delay) {
+        var timer = null;
+
+        var handleFn = function() {
+            if (timer) clearTimeout(timer);
+
+            var _this = this;
+            var _arguments = arguments;
+
+            timer = setTimeout(function() {
+                fn.apply(_this, _arguments);
+            }, delay)
+        }
+
+        // 添加取消函数
+        handleFn.cancle = function() {
+            if (timer) clearTimeout(timer);
+        }
+
+        return handleFn;
+    }
+
+    /** 3. 优化立即执行 */
+    function debounce2(fn, delay, leading) {
+        var timer = null;
+        leading = leading || false;
+
+        var handleFn = function() {
+            if (timer) clearTimeout(timer);
+
+            var _this = this;
+            var _arguments = arguments;
+
+            if (leading) {
+                // 通过一个变量来记录是否立即执行
+                var isInvoke = false;
+                if (!timer) {
+                    fn.apply(_this, _arguments);
+                    isInvoke = true;
+                }
+                // 定时器通过修改timer来修改instant
+                timer = setTimeout(function() {
+                    timer = null;
+                    if (!isInvoke) {
+                        fn.apply(_this, _arguments);
+                    }
+                }, delay);
+            } else {
+                timer = setTimeout(function() {
+                    fn.apply(_this, _arguments);
+                }, delay)
+            }
+        }
+
+        // 添加取消函数
+        handleFn.cancle = function() {
+            if (timer) clearTimeout(timer);
+        }
+
+        return handleFn;
+    }
+
+    var inputEle = document.querySelector('#input');
+    var cancleBtn = document.querySelector('#cancle');
+
+    // var searchChange = debounce(getInputVal, 1000);
+    // var searchChange = debounce1(getInputVal, 3000);
+    var searchChange = debounce2(getInputVal, 3000, true);
+
+    inputEle.addEventListener('input', function(e) {
+        searchChange(e);
+    })
+
+    cancleBtn.addEventListener('click', function() {
+        searchChange.cancle();
+    })
+</script>
