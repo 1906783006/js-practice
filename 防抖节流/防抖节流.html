@@ -12,8 +12,8 @@
 </html>
 
 <script>
-    function getInputVal(e) {
-        console.log(e.target.value);
+    function getInputVal() {
+        console.log(arguments[0].target.value);
     }
 
     // 防抖函数
@@ -22,8 +22,12 @@
 
         return function() {
             if(timer) clearTimeout(timer);
+
+            var _this = this;
+            var _arguments = arguments;
+
             timer = setTimeout(function() {
-                fn();
+                fn.apply(_this, _arguments);
             }, delay);
         }
     }
@@ -32,6 +36,6 @@
     var searchChange = debounce(getInputVal, 1000);
 
     inputEle.addEventListener('input', function(e) {
-        searchChange();
+        searchChange(e);
     })
 </script>
