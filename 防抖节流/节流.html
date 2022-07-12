@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    <input type="text" id="input">
+    <button id="cancle">取消发送</button>
+</body>
+</html>
+
+<script>
+    function getInputVal() {
+        console.log(arguments[0].target.value);
+    }
+
+    function getReturn() {
+        return 'test return';
+    }
+
+    /** 自定义节流函数 */
+    function throttle(fn, interval) {
+        var last = 0;
+
+        return function() {
+            var now = new Date().getTime();
+            var _this = this;
+            var _argument = arguments;
+
+            if (now - last > interval) {
+                fn.apply(_this, _argument);
+                last = now;
+            }
+        }
+    }
+
+    /** 2. 优化最后一次执行, 优化取消功能 */
+    function throttle1(fn, interval, option) {
+        var last = 0;
+        var timer = null;
+        if (!option) option = {};
+        var trailing = option.trailing || null;
+
+        function handleFn() {
+            var now = new Date().getTime();
+            var _this = this;
+            var _argument = arguments;
+
+            if (now - last > interval) {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+                fn.apply(_this, _argument);
+                last = now;
+            } else if (!timer && trailing) {
+                timer = setTimeout(function() {
+                    fn.apply(_this, _argument);
+                    timer = null;
+                }, interval);
+            }
+        }
+
+        handleFn.cancle = function() {
+            clearTimeout(timer);
+            timer = null;
+        }
+
+        return handleFn;
+    }
+
+    /** 3. 优化返回值 */
+    function throttle2(fn, interval, option) {
+        var last = 0;
+        var timer = null;
+        if (!option) option = {};
+        var trailing = option.trailing || null;
+        var result = option.result || null;
+
+        function handleFn() {
+            var now = new Date().getTime();
+            var _this = this;
+            var _argument = arguments;
+
+            if (now - last > interval) {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+                callFn(_this, _argument);
+                last = now;
+            } else if (!timer && trailing) {
+                timer = setTimeout(function() {
+                    callFn(_this, _argument);
+                    timer = null;
+                }, interval);
+            }
+        }
+
+        // 定义调用函数
+        function callFn(context, argument) {
+            var res = fn.apply(context, argument);
+            if (result) {
+                result(res);
+            }
+        }
+
+        handleFn.cancle = function() {
+            clearTimeout(timer);
+            timer = null;
+        }
+
+        return handleFn;
+    }
+
+    var inputEle = document.querySelector('#input');
+    var cancleBtn = document.querySelector('#cancle');
+
+    // var searchChange = throttle(getInputVal, 2000);
+    // var searchChange = throttle1(getInputVal, 5000, {trailing: true});
+    var searchChange = throttle2(getReturn, 5000, {trailing: true, result: function(res) {
+        console.log(res);
+    }});
+
+    inputEle.addEventListener('input', function(e) {
+        searchChange(e);
+    })
+
+    cancleBtn.addEventListener('click', function() {
+        searchChange.cancle();
+    })
+</script>
