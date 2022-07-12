@@ -17,6 +17,10 @@
         console.log(arguments[0].target.value);
     }
 
+    function getReturn() {
+        return 'test return';
+    }
+
     /** 1. 防抖函数 */
     function debounce(fn, delay) {
         var timer = null;
@@ -96,12 +100,67 @@
         return handleFn;
     }
 
+    /** 4. 优化返回值方法1，还有一种通过 promise 获取返回值，这里不再说明 */
+    function debounce3(fn, delay, option) {
+        var timer = null;
+        if (!option) option = {};
+        leading = option.leading || false;
+        result = option.result || null;
+
+        var handleFn = function() {
+            if (timer) clearTimeout(timer);
+
+            var _this = this;
+            var _arguments = arguments;
+
+            if (leading) {
+                // 通过一个变量来记录是否立即执行
+                var isInvoke = false;
+                if (!timer) {
+                    isInvoke = true;
+                    callFn(_this, _arguments);
+                }
+                // 定时器通过修改timer来修改instant
+                timer = setTimeout(function() {
+                    if (!isInvoke) {
+                        callFn(_this, _arguments);
+                    }
+                }, delay)
+
+            } else {
+                timer = setTimeout(function() {
+                    callFn(_this, _arguments);
+                }, delay)
+            }
+        }
+
+        // 定义调用函数
+        function callFn(context, argument) {
+            var res = fn.apply(context, argument);
+            if (result) {
+                result(res);
+            }
+        }
+
+        // 添加取消函数
+        handleFn.cancle = function() {
+            if (timer) clearTimeout(timer);
+        }
+
+        return handleFn;
+
+    }
+
     var inputEle = document.querySelector('#input');
     var cancleBtn = document.querySelector('#cancle');
 
     // var searchChange = debounce(getInputVal, 1000);
     // var searchChange = debounce1(getInputVal, 3000);
-    var searchChange = debounce2(getInputVal, 3000, true);
+    // var searchChange = debounce2(getInputVal, 3000, true);
+    // result 传入一个函数，接收回调值
+    var searchChange = debounce3(getReturn, 3000, {leading: false, result: function(res) {
+        console.log(res);
+    }});
 
     inputEle.addEventListener('input', function(e) {
         searchChange(e);
